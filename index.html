@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Prolab I</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <script type="text/javascript"
+            src="http://maps.googleapis.com/maps/api/js?v=3.8&key=AIzaSyCw8nZcALuEvbLvinVgm1eDqureVbIeqCA&sensor=false">
+    </script>
+  <body onload="getJson();"/>
+    <div id="map"></div>
+    <script>
+      // This example adds an animated symbol to a polyline.
+
+      var secim;
+      secim = prompt("Dosya adı","xxx.txt");
+      document.write("Dosya adı: "+secim);
+
+      var sehirler = new Array();
+      var dizi;
+      var points = [];
+      var xmlhttp = new XMLHttpRequest();
+      xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+              dizi = JSON.parse(this.responseText);
+
+              for(var i=0;i<dizi.length;i+=2){
+                  points.push({lat:dizi[i],lng:dizi[i+1]});
+                  sehirler[i] = new google.maps.LatLng(dizi[i],dizi[i+1]);
+              }
+             initMap();
+          }
+      };
+
+      function getJson()
+      {
+          xmlhttp.open("GET", secim, true);
+          xmlhttp.send();
+      }
+
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 39.1667, lng: 35.6667},
+          zoom: 6,
+          mapTypeId: 'terrain'
+        });
+
+
+        // Define the symbol, using one of the predefined paths ('CIRCLE')
+        // supplied by the Google Maps JavaScript API.
+        var lineSymbol = {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 8,
+          strokeColor: '#393'
+        };
+
+
+        // Create the polyline and add the symbol to it via the 'icons' property.
+        var line = new google.maps.Polyline({
+          path: points,
+          icons: [{
+            icon: lineSymbol,
+            offset: '100%'
+          }],
+          map: map
+        });
+
+        animateCircle(line);
+      }
+
+      // Use the DOM setInterval() function to change the offset of the symbol
+      // at fixed intervals.
+      function animateCircle(line) {
+          var count = 0;
+          window.setInterval(function() {
+            count = (count + 1) % 200;
+
+            var icons = line.get('icons');
+            icons[0].offset = (count / 2) + '%';
+            line.set('icons', icons);
+        }, 20);
+      }
+    </script>
+
+</html>
